@@ -1,25 +1,14 @@
-import {useCallback} from 'react';
 import {Platform, Rationale} from 'react-native';
-import {
-  check,
-  request,
-  PERMISSIONS,
-  PermissionStatus,
-} from 'react-native-permissions';
-
-interface Permission {
-  checkPermission: () => Promise<PermissionStatus | null>;
-  requestPermission: () => Promise<PermissionStatus | null>;
-}
+import {check, request, PERMISSIONS, RESULTS} from 'react-native-permissions';
 
 // Android
-export const useAndroidPermissions = (
+export const useAndroidPermissions = async (
   requestRationale: Rationale,
-): Permission => {
+): Promise<Boolean> => {
   const checkPermission = async () => {
     try {
       const fineLocationStatus = await check(
-        PERMISSIONS.ANDROID.ACCESS_BACKGROUND_LOCATION,
+        PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION,
       );
       return fineLocationStatus;
     } catch (error) {
@@ -28,10 +17,10 @@ export const useAndroidPermissions = (
     }
   };
 
-  const requestPermission = useCallback(async () => {
+  const requestPermission = async () => {
     try {
       const permissionStatus = await request(
-        PERMISSIONS.ANDROID.ACCESS_BACKGROUND_LOCATION,
+        PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION,
         requestRationale,
       );
       return permissionStatus;
@@ -39,16 +28,27 @@ export const useAndroidPermissions = (
       console.error('Android: requestPermission error', error);
       return null;
     }
-  }, [requestRationale]);
-
-  return {
-    checkPermission: checkPermission,
-    requestPermission: requestPermission,
   };
+
+  const checked = await checkPermission();
+  let result = false;
+  switch (checked) {
+    case RESULTS.DENIED:
+      const requested = await requestPermission();
+      if (requested === RESULTS.GRANTED) {
+        result = true;
+      }
+      break;
+    default:
+      result = false;
+  }
+  return result;
 };
 
 // iOS
-export const useIosPermissions = (requestRationale: Rationale): Permission => {
+export const useIosPermissions = async (
+  requestRationale: Rationale,
+): Promise<Boolean> => {
   const checkPermission = async () => {
     try {
       const status = await check(PERMISSIONS.IOS.LOCATION_WHEN_IN_USE);
@@ -59,10 +59,10 @@ export const useIosPermissions = (requestRationale: Rationale): Permission => {
     }
   };
 
-  const requestPermission = useCallback(async () => {
+  const requestPermission = async () => {
     try {
       const status = await request(
-        PERMISSIONS.IOS.LOCATION_ALWAYS,
+        PERMISSIONS.IOS.LOCATION_WHEN_IN_USE,
         requestRationale,
       );
       return status;
@@ -70,12 +70,21 @@ export const useIosPermissions = (requestRationale: Rationale): Permission => {
       console.error('iOS: requestPermission error', error);
       return null;
     }
-  }, [requestRationale]);
-
-  return {
-    checkPermission: checkPermission,
-    requestPermission: requestPermission,
   };
+
+  const checked = await checkPermission();
+  let result = false;
+  switch (checked) {
+    case RESULTS.DENIED:
+      const requested = await requestPermission();
+      if (requested === RESULTS.GRANTED) {
+        result = true;
+      }
+      break;
+    default:
+      result = false;
+  }
+  return result;
 };
 
 export const usePermissions = Platform.select({

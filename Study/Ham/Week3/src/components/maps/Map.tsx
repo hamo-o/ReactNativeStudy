@@ -1,3 +1,4 @@
+import {View} from 'react-native';
 import {usePermissions} from '../../hooks/usePermissions';
 
 const Map = () => {
@@ -7,7 +8,7 @@ const Map = () => {
     buttonPositive: '확인',
   });
 
-  return <></>;
+  return <View></View>;
 };
 
 export default Map;
