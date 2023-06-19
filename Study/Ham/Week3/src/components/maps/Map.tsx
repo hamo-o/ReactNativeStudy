@@ -1,7 +1,8 @@
-import {useState} from 'react';
-import {Text, View} from 'react-native';
+import React, {useState} from 'react';
+import {View} from 'react-native';
 import {usePermissions} from '../../hooks/usePermissions';
 import Geolocation from '@react-native-community/geolocation';
+import NaverMapView, {Marker} from 'react-native-nmap';
 
 const Map = () => {
   usePermissions({
@@ -10,19 +11,23 @@ const Map = () => {
     buttonPositive: '확인',
   });
 
-  const [latitude, setLatitude] = useState<string | null>(null);
-  const [longitude, setLongitude] = useState<string | null>(null);
+  const [latitude, setLatitude] = useState<number>(0);
+  const [longitude, setLongitude] = useState<number>(0);
   Geolocation.getCurrentPosition(position => {
     const lati = JSON.stringify(position.coords.latitude);
     const long = JSON.stringify(position.coords.longitude);
-    setLatitude(lati);
-    setLongitude(long);
+    setLatitude(Number(lati));
+    setLongitude(Number(long));
   });
 
   return (
-    <View>
-      <Text>{latitude}</Text>
-      <Text>{longitude}</Text>
+    <View style={{flex: 1}}>
+      <NaverMapView
+        style={{width: '100%', height: '100%'}}
+        showsMyLocationButton={true}
+        center={{latitude: latitude, longitude: longitude, zoom: 15}}
+      />
+      <Marker coordinate={{latitude: latitude, longitude: longitude}} />
     </View>
   );
 };
