@@ -16,6 +16,7 @@
     "postinstall": "react-native setup-ios-permissions && cd ios && pod install"
   },
   "dependencies": {
+    "@react-native-community/geolocation": "^3.0.6",
     "react": "18.2.0",
     "react-native": "0.71.11",
     "react-native-permissions": "^3.8.0"
