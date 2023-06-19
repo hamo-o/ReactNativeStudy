@@ -355,6 +355,7 @@ android/
 .bundle/
 *.iml
 .node-version
+.env
 
 
 
